@@ -122,6 +122,7 @@ ln -s /usr/local/n/versions/node/6.11.4/bin/node /usr/bin/node
 ln -s /usr/local/n/versions/node/6.11.4/bin/npm /usr/bin/npm
 npm install yarn -g
 
+echo "Installing XO-Server..."
 cd /opt
 wget https://raw.githubusercontent.com/SimonAnnetts/OVHStorageServer/master/xo-server.tar.bz2
 tar -jxf xo-server.tar.bz2
@@ -184,17 +185,29 @@ EOF
 systemctl enable xo-server
 systemctl start xo-server
 
+
+# allow pubkey login from these hosts
+echo "Adding public keys to authorized_keys file..."
+mkdir /root/.ssh 2>/dev/null
+cat <<EOF >/root/.ssh/authorized_keys
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCnjjx8LAnHxL6mbRb/sWPsFJXAR7ZJEbpSXmNR78QYkGzH8QK1vg+fP9/RzMKSxNOsbASNIhX1wRCQf9zHQmrJVZz2NMfphW5J4952BGKJUr3ozUcf+DD6OEf8V7J9Ps/lFJpZrhxH5hqWWHFRq52We4vJrnTwAESx80YHpxRa4foAxhNaQUFqqleyBzj6c+bJWR8NNBAZ7EC/w2dRDXsULEpOfhNJWcey2MVLUl7hHJalbuveMuUzpqzCErkYUNhDA+MEKzlfsq0qMmBRb0VxIk03Y704Nt5wrQl2msXgM01U//yZbP15hXbQkd3NkRyAQk+MkWKCAp/XJ9IY/JYj root@esdm-xen1-16
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAqWov1i1l4LpHx/PlvNjMBP1ZTa3exSaIf9akdUC1d2tL70SR9nG0TMVIvFn19jQLrja459mg4NeF/Nab+3cN3k+NVbt7H/NgCRxv6JSJ2962ZLlUTGa+VcYy/372CGSPncrQQiXGB2y76yMDEY2SlMzOXLx7793AHWs49gHxzJuOjJT7ioO6wKHKTaIDs9lg3SkIZ8qrmZvw2XrI3uPxeNg1Bz1Y1ltY4dirdY/xkXxDMpIUVZVR6Ui83GA11npwnS+xnnLEqoOLV52t91/A80slCxrLPpvcZJ8+0oK+xQt0JPDYlPdMB/46qdMbe+wXd04fDy6Om8sb9W6uB8E3Aw== root@esdm-xen1.esdm.co.uk
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0n12uWH3NwP0QRXd3K7PG2NIPmwyn97meXT4/N2M86lXr8dPlTvRI7hsOydL+u9YRAP/oK6u/Gu3APrzUUENBWM5oA7uMf8WO9NyGR1LV+pc3ok5RLTnj1Rto0IQDJhB2Avtn4cpZ80prR/GPlscIXNN8uQttYTU4w3pXpgyBFznOhwjAHjbK+7bzTFrGaafATC5oEbzi2d3wni9K13A8DAm00CWNXRxWhXc34UK7Q3G8mo1SmM3DzDYP682BzilR5v07ZNn1kd0HCy5DPSQoAeJZFAQpvf+vE7LjJVFd1AoMkxMTV7/pED3k847isMfJHQkpem3q8ijZTDadWPBp root@host3-16
+EOF
+chmod 700 /root/.ssh
+chmod 600 /root/.ssh/authorized_keys
+
 # now create some storage users
+echo "Creating Users..."
 for u in 1 2 3; do
   useradd -m -c "Storage User${u}" storage${u} -s /bin/bash
   mkdir /home/storage${u}/.ssh
   chmod 700 /home/storage${u}/.ssh
   chown storage${u}:storage${u} /home/storage${u}/.ssh
-  touch /home/storage${u}/.ssh/authorized_keys
+  cp -f /root/.ssh/authorized_keys /home/storage${u}/.ssh/authorized_keys
   chmod 600 /home/storage${u}/.ssh/authorized_keys
   chown storage${u}:storage${u} /home/storage${u}/.ssh/authorized_keys
 done
-
 
 
 
