@@ -8,7 +8,7 @@ apt update
 apt -y upgrade
 
 # install some required packages
-apt -y install joe npm git exim4 libvhdi-utils shorewall build-essential redis-server libpng-dev python-minimal tmux
+apt -y install joe npm git exim4 libvhdi-utils shorewall build-essential redis-server libpng-dev python-minimal tmux wget
 
 systemctl enable exim4
 
