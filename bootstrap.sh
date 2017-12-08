@@ -8,9 +8,24 @@ apt update
 apt -y upgrade
 
 # install some required packages
-apt -y install joe npm git exim4 libvhdi-utils shorewall build-essential redis-server libpng-dev python-minimal tmux wget
+apt -y install joe npm git libvhdi-utils shorewall build-essential redis-server libpng-dev python-minimal tmux wget debconf
+
+# create a preseed config for exim4
+cat <<EOF >/root/preseed.txt
+exim4-config exim4/dc_relay_nets string
+exim4-config exim4/dc_minimaldns select false
+exim4-config exim4/use_split_config select false
+exim4-config exim4/dc_smarthost string
+exim4-config exim4/dc_local_interfaces string  127.0.0.1 ; ::1
+exim4-config exim4/dc_eximconfig_configtype select internet site; mail is sent and received directly using SMTP
+exim4-config exim4/dc_localdelivery select mbox format in /var/mail/
+exim4-config exim4/dc_relay_domains string
+EOF
+
+apt -y install exim4
 
 systemctl enable exim4
+systemctl start exim4
 
 # setup shorewall
 cat <<EOF >/etc/shorewall/interfaces
