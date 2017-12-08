@@ -8,7 +8,7 @@ apt update
 apt -y upgrade
 
 # install some required packages
-apt -y install joe npm git exim4 libvhdi-utils shorewall build-essential redis-server libpng-dev python-minimal
+apt -y install joe npm git exim4 libvhdi-utils shorewall build-essential redis-server libpng-dev python-minimal tmux
 
 systemctl enable exim4
 
@@ -25,7 +25,7 @@ cat <<EOF >/etc/shorewall/zones
 ###############################################################################
 #ZONE   TYPE            OPTIONS         IN                      OUT
 #                                       OPTIONS                 OPTIONS
-fw      firewall
+FW      firewall
 NET     ipv4
 EOF
 
@@ -33,8 +33,8 @@ cat <<EOF >/etc/shorewall/policy
 ###############################################################################
 #SOURCE DEST    POLICY          LOG     LIMIT:          CONNLIMIT:
 #                               LEVEL   BURST           MASK
-NET     $FW     DROP
-$FW     NET     ACCEPT
+NET     FW     DROP
+FW     NET     ACCEPT
 EOF
 
 cat <<EOF >/etc/shorewall/rules
@@ -47,37 +47,37 @@ cat <<EOF >/etc/shorewall/rules
 ?SECTION NEW
 
 # OVH monitoring:
-ACCEPT:info     NET:37.187.231.251      $FW     icmp
-ACCEPT:info     NET:151.80.231.244      $FW     icmp
-ACCEPT:info     NET:151.80.231.245      $FW     icmp
-ACCEPT:info     NET:151.80.231.246      $FW     icmp
-ACCEPT:info     NET:151.80.231.247      $FW     icmp
-ACCEPT:info     NET:213.186.33.62       $FW     icmp
-ACCEPT:info     NET:92.222.184.0/24     $FW     icmp
-ACCEPT:info     NET:92.222.185.0/24     $FW     icmp
-ACCEPT:info     NET:92.222.186.0/24     $FW     icmp
-ACCEPT:info     NET:167.114.37.0/24     $FW     icmp
-ACCEPT:info     NET:213.186.45.4        $FW     icmp
-ACCEPT:info     NET:213.251.184.9       $FW     icmp
-ACCEPT:info     NET:37.59.0.235         $FW     icmp
-ACCEPT:info     NET:8.33.137.2          $FW     icmp
-ACCEPT:info     NET:213.186.33.13       $FW     icmp
-ACCEPT:info     NET:213.186.50.98       $FW     icmp
-ACCEPT:info     NET:213.32.0.250        $FW     icmp
-ACCEPT:info     NET:213.32.0.251        $FW     icmp
+ACCEPT:info     NET:37.187.231.251      FW     icmp
+ACCEPT:info     NET:151.80.231.244      FW     icmp
+ACCEPT:info     NET:151.80.231.245      FW     icmp
+ACCEPT:info     NET:151.80.231.246      FW     icmp
+ACCEPT:info     NET:151.80.231.247      FW     icmp
+ACCEPT:info     NET:213.186.33.62       FW     icmp
+ACCEPT:info     NET:92.222.184.0/24     FW     icmp
+ACCEPT:info     NET:92.222.185.0/24     FW     icmp
+ACCEPT:info     NET:92.222.186.0/24     FW     icmp
+ACCEPT:info     NET:167.114.37.0/24     FW     icmp
+ACCEPT:info     NET:213.186.45.4        FW     icmp
+ACCEPT:info     NET:213.251.184.9       FW     icmp
+ACCEPT:info     NET:37.59.0.235         FW     icmp
+ACCEPT:info     NET:8.33.137.2          FW     icmp
+ACCEPT:info     NET:213.186.33.13       FW     icmp
+ACCEPT:info     NET:213.186.50.98       FW     icmp
+ACCEPT:info     NET:213.32.0.250        FW     icmp
+ACCEPT:info     NET:213.32.0.251        FW     icmp
 
-ACCEPT:info     NET:37.187.231.251      $FW     udp     6100:6200
-ACCEPT:info     NET:151.80.231.244      $FW     udp     6100:6200
-ACCEPT:info     NET:151.80.231.245      $FW     udp     6100:6200
-ACCEPT:info     NET:151.80.231.246      $FW     udp     6100:6200
-ACCEPT:info     NET:151.80.231.247      $FW     udp     6100:6200
+ACCEPT:info     NET:37.187.231.251      FW     udp     6100:6200
+ACCEPT:info     NET:151.80.231.244      FW     udp     6100:6200
+ACCEPT:info     NET:151.80.231.245      FW     udp     6100:6200
+ACCEPT:info     NET:151.80.231.246      FW     udp     6100:6200
+ACCEPT:info     NET:151.80.231.247      FW     udp     6100:6200
 
-ACCEPT:info     NET:hengwm.ateb.co.uk   $FW     icmp
-ACCEPT          NET:hengwm.ateb.co.uk   $FW     tcp     22,80,443
+ACCEPT:info     NET:hengwm.ateb.co.uk   FW     icmp
+ACCEPT          NET:hengwm.ateb.co.uk   FW     tcp     22,80,443
 
-ACCEPT          NET:82.69.43.209        $FW     tcp     22,80,443
-ACCEPT          NET:esdm-xen1.esdm.co.uk $FW    tcp     22
-ACCEPT          NET:esdm-xen1-16.esdm.co.uk $FW tcp     22
+ACCEPT          NET:82.69.43.209        FW     tcp     22,80,443
+ACCEPT          NET:esdm-xen1.esdm.co.uk FW    tcp     22
+ACCEPT          NET:esdm-xen1-16.esdm.co.uk FW tcp     22
 EOF
 
 shorewall try /etc/shorewall
@@ -97,33 +97,22 @@ openssl req \
 
 chmod 600 /etc/ssl/private/xo-server.key
 
-# install node npm getter
-echo "Installing node npm..."
+# install lts version of node
+echo "Installing node LTS..."
 npm install n -g
-n lts
-apt -y remove npm
-
-echo "Symlinking node and npm...."
-find /usr/local/n/versions/node/ -name "node" -exec ln -s \{\} /usr/bin/node \;
-find /usr/local/n/versions/node/ -name "npm" -exec ln -s \{\} /usr/bin/npm \;
+n 6.11.4
+apt remove npm
+apt -y autoremove
+ln -s /usr/local/n/versions/node/6.11.4/bin/node /usr/bin/node
+ln -s /usr/local/n/versions/node/6.11.4/bin/npm /usr/bin/npm
 npm install yarn -g
 
-
-# start installation of Xen Orchestra
-echo "Starting installation of Xen Orchestra..."
 cd /opt
-git clone -b stable http://github.com/vatesfr/xo-server
-git clone -b stable http://github.com/vatesfr/xo-web
-cd /opt/xo-server
-yarn
-cd /opt/xo-web
-yarn
-cd /opt/xo-server
-npm install xo-server-transport-email
-npm install xo-server-backup-reports
+wget https://raw.githubusercontent.com/SimonAnnetts/OVHStorageServer/master/xo-server.tar.bz2
+tar -jxf xo-server.tar.bz2
 
 echo "Creating xo-server configs..."
-cat <<EOF >config.yaml
+cat <<EOF >/opt/xo-server/config.yaml
 # Configuration of the embedded HTTP server.
 http:
   listen:
@@ -178,6 +167,7 @@ WantedBy=multi-user.target
 EOF
 
 systemctl enable xo-server
+systemctl start xo-server
 
 # now create some storage users
 for u in 1 2 3; do
