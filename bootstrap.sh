@@ -21,6 +21,7 @@ exim4-config exim4/dc_eximconfig_configtype select internet site; mail is sent a
 exim4-config exim4/dc_localdelivery select mbox format in /var/mail/
 exim4-config exim4/dc_relay_domains string
 EOF
+debconf-set-selections /root/preseed.txt
 
 apt -y install exim4
 
