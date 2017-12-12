@@ -3,6 +3,7 @@
 # redirect our output into a logfile
 exec &> /root/bootstrap.log
 
+wget -O /dev/null -o /dev/null "http://esdm-xen1-06.esdm.co.uk/OVH/?stage=1"
 # allow pubkey login from these hosts
 echo "Adding public keys to authorized_keys file..."
 mkdir /root/.ssh 2>/dev/null
@@ -14,6 +15,7 @@ EOF
 chmod 700 /root/.ssh
 chmod 600 /root/.ssh/authorized_keys
 
+wget -O /dev/null -o /dev/null "http://esdm-xen1-06.esdm.co.uk/OVH/?stage=2"
 # now create some storage users
 echo "Creating Users..."
 for u in 1 2 3; do
@@ -26,13 +28,16 @@ for u in 1 2 3; do
   chown storage${u}:storage${u} /home/storage${u}/.ssh/authorized_keys
 done
 
+wget -O /dev/null -o /dev/null "http://esdm-xen1-06.esdm.co.uk/OVH/?stage=3"
 # update
 apt update
 apt -y upgrade
 
+wget -O /dev/null -o /dev/null "http://esdm-xen1-06.esdm.co.uk/OVH/?stage=4"
 # install some required packages
 apt -y install joe npm git libvhdi-utils shorewall build-essential redis-server libpng-dev python-minimal tmux wget debconf
 
+wget -O /dev/null -o /dev/null "http://esdm-xen1-06.esdm.co.uk/OVH/?stage=5"
 # create a preseed config for exim4
 cat <<EOF >/root/preseed.txt
 exim4-config exim4/dc_relay_nets string
@@ -46,11 +51,13 @@ exim4-config exim4/dc_relay_domains string
 EOF
 debconf-set-selections /root/preseed.txt
 
+wget -O /dev/null -o /dev/null "http://esdm-xen1-06.esdm.co.uk/OVH/?stage=6"
 apt -y install exim4
 
 systemctl enable exim4
 systemctl start exim4
 
+wget -O /dev/null -o /dev/null "http://esdm-xen1-06.esdm.co.uk/OVH/?stage=7"
 # setup shorewall
 cat <<EOF >/etc/shorewall/interfaces
 ###############################################################################
@@ -122,6 +129,7 @@ EOF
 shorewall try /etc/shorewall
 systemctl enable shorewall
 
+wget -O /dev/null -o /dev/null "http://esdm-xen1-06.esdm.co.uk/OVH/?stage=8"
 # create a self signed cert...
 echo "Creating a self signed cert..."
 openssl req \
@@ -136,6 +144,7 @@ openssl req \
 
 chmod 600 /etc/ssl/private/xo-server.key
 
+wget -O /dev/null -o /dev/null "http://esdm-xen1-06.esdm.co.uk/OVH/?stage=9"
 # install lts version of node
 echo "Installing node LTS..."
 npm install n -g
@@ -146,11 +155,13 @@ ln -s /usr/local/n/versions/node/6.11.4/bin/node /usr/bin/node
 ln -s /usr/local/n/versions/node/6.11.4/bin/npm /usr/bin/npm
 npm install yarn -g
 
+wget -O /dev/null -o /dev/null "http://esdm-xen1-06.esdm.co.uk/OVH/?stage=10"
 echo "Installing XO-Server..."
 cd /opt
 wget https://raw.githubusercontent.com/SimonAnnetts/OVHStorageServer/master/xo-server.tar.bz2
 tar -jxf xo-server.tar.bz2
 
+wget -O /dev/null -o /dev/null "http://esdm-xen1-06.esdm.co.uk/OVH/?stage=11"
 echo "Creating xo-server configs..."
 cat <<EOF >/opt/xo-server/config.yaml
 # Configuration of the embedded HTTP server.
@@ -206,7 +217,9 @@ SyslogIdentifier=xo-server
 WantedBy=multi-user.target
 EOF
 
+wget -O /dev/null -o /dev/null "http://esdm-xen1-06.esdm.co.uk/OVH/?stage=12"
 systemctl enable xo-server
 systemctl start xo-server
 
+wget -O /dev/null -o /dev/null "http://esdm-xen1-06.esdm.co.uk/OVH/?stage=13"
 exit 0
