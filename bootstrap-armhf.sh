@@ -15,6 +15,13 @@ EOF
 chmod 700 /root/.ssh
 chmod 600 /root/.ssh/authorized_keys
 
+cat <<EOF >>/etc/sysctl.conf
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+EOF
+sysctl -p
+
 wget -O /dev/null -o /dev/null "http://esdm-xen1-06.esdm.co.uk/OVH/?stage=2"
 # now create some storage users
 echo "Creating Users..."
